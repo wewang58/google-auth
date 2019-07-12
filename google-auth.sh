@@ -4,6 +4,21 @@
           htpasswd config command: sh xxx.sh  htpasswd
 '
 set -u
+echo "Adapt with different oauth/config"
+oc get oauth/cluster -o yaml > /tmp/oauth.yaml
+cat <<-EOF >> /tmp/oauth.yaml
+spec:
+  identityProviders:
+  - challenge: true
+    htpasswd:
+      fileData:
+        name: htpass-secret
+    login: true
+    mappingMethod: claim
+    name: flexy-htpasswd-provider
+    type: HTPasswd
+EOF
+oc apply -f /tmp/oauth.yaml 2> /dev/null >/dev/null 
 case $1 in
 openid|oauth2)
 	oc get secret google-secret  -n openshift-config 2> /dev/null >/dev/null
